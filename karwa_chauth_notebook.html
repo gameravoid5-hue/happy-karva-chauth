@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Karwa Chauth Book Surprise</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #2c1e16;
+            background-image: radial-gradient(#3e2723, #1b0000);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            font-family: 'Caveat', cursive;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        /* Realistic Book Container - Size Reduced */
+        #book-container {
+            width: 88vw;
+            height: 82vh;
+            max-width: 360px; /* Page width reduced */
+            max-height: 650px; /* Page height reduced */
+            background-color: #fdfbf7;
+            position: relative;
+            overflow: hidden;
+            border-radius: 5px 15px 15px 5px;
+            
+            box-shadow: 
+                inset 25px 0 25px -10px rgba(0,0,0,0.4),
+                inset 2px 0 5px rgba(255,255,255,0.5),
+                10px 15px 25px rgba(0,0,0,0.6),
+                3px 0 0 #e5e0d8,
+                6px 0 0 #d1cbbd,
+                9px 0 0 #c2bcad;
+            cursor: pointer;
+        }
+
+        .paper-texture {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.4;
+            background-image: 
+                linear-gradient(90deg, transparent 95%, rgba(0,0,0,0.05) 100%),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            transform-origin: left center;
+            transform: rotateY(-90deg);
+            opacity: 0;
+            transition: transform 0.7s cubic-bezier(0.645, 0.045, 0.355, 1), opacity 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            padding: 50px 20px 30px 50px;
+            box-sizing: border-box;
+            background-color: #fdfbf7;
+            background-image: repeating-linear-gradient(transparent, transparent 33px, #93b9c6 34px);
+            background-position: 0 40px;
+        }
+
+        .page.cover {
+            background-color: #4a2119;
+            background-image: radial-gradient(circle, #5e2a20, #361711);
+            color: #fceabb;
+            box-shadow: inset 10px 0 20px rgba(0,0,0,0.6);
+            justify-content: center;
+            padding: 40px 30px;
+        }
+
+        .page.active {
+            transform: rotateY(0deg);
+            opacity: 1;
+            z-index: 2;
+            box-shadow: inset 15px 0 20px -10px rgba(0,0,0,0.2);
+        }
+
+        .page.done {
+            transform: rotateY(90deg);
+            opacity: 0;
+            z-index: 0;
+        }
+
+        .ink-text {
+            color: #0c1e5c;
+            font-size: 2.2rem;
+            line-height: 1.2;
+            font-weight: 700;
+            text-shadow: 1px 1px 1px rgba(12, 30, 92, 0.1);
+            text-align: center;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.5s ease 0.3s, transform 0.5s ease 0.3s;
+        }
+
+        .page.cover .ink-text {
+            color: #fceabb;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .active .ink-text {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @keyframes bouncyDrop {
+            0% { 
+                transform: translateY(-50vh) scale(0.4) rotateX(70deg) rotateY(30deg); 
+                opacity: 0; 
+            }
+            50% { 
+                transform: translateY(20px) scale(1.1) rotateX(-15deg) rotateY(-10deg); 
+                opacity: 1;
+                filter: drop-shadow(15px 25px 15px rgba(0,0,0,0.4));
+            }
+            75% { 
+                transform: translateY(-10px) scale(0.95) rotateX(5deg) rotateY(5deg); 
+                filter: drop-shadow(10px 15px 10px rgba(0,0,0,0.3));
+            }
+            100% { 
+                transform: translateY(0) scale(1) rotateX(0deg) rotateY(0deg); 
+                opacity: 1;
+                filter: drop-shadow(5px 10px 8px rgba(0,0,0,0.5));
+            }
+        }
+
+        .snack-container {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1200px;
+        }
+
+        .snack-wrapper {
+            opacity: 0;
+            transform-style: preserve-3d;
+            will-change: transform, opacity, filter;
+        }
+
+        .active .snack-wrapper {
+            animation: bouncyDrop 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation-delay: 0.6s;
+        }
+
+        /* Snacks Size Increased */
+        .snack-img {
+            max-width: 290px; /* Increased from 220px */
+            max-height: 290px; /* Increased from 220px */
+            object-fit: contain;
+            display: block;
+        }
+
+        .placeholder-box {
+            display: none;
+            width: 200px;
+            height: 150px;
+            background-color: #f1f5f9;
+            color: #64748b;
+            border: 2px dashed #94a3b8;
+            border-radius: 12px;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-family: 'Arial', sans-serif;
+            font-size: 0.9rem;
+            padding: 10px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        }
+
+        .tap-hint {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 1.3rem;
+            color: #8b6b61;
+            animation: pulse 2s infinite;
+        }
+        
+        .page.cover .tap-hint {
+            color: #fceabb;
+            opacity: 0.7;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="book-container">
+    <div class="paper-texture"></div>
+    <div id="pages-wrapper">
+        <!-- Pages will be injected here by JS -->
+    </div>
+</div>
+
+<script>
+    const pagesData = [
+        { 
+            type: 'cover', 
+            text: 'ye tumhare liye, Meri aanu ki mummy ❤️<br><br><span style="color: #ffd700; font-size: 3rem;">Happy Karwa Chauth!</span><br><br><span style="font-size: 1.4rem; color: #fff; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; display: inline-block; line-height: 1.2;">Note: Aage ke pages me jo blank (________) jagah hain, unka jawab wahan aane wale snacks ke naam hain! Tap karke page palto.</span>' 
+        },
+        { text: 'Hello my ________', img: './little-hearts.png' },
+        { text: 'Happy Karwa Chauth my ________', img: './choco-pie.png' },
+        { text: 'My mind goes ________ when I see you', img: './crispello.png' },
+        { text: 'You are the ________ of my life', img: './gems.png' },
+        { text: 'I wish your life to be as sweet as ________', img: './dairy-milk.png' },
+        { text: 'I never want to take a ________ break from our relation', img: './kitkat.png' },
+        { text: 'My only ________ is to be with you forever', img: './dark-fantasy.png' },
+        { text: 'You give freshness in my life as ________', img: './center-fresh.png' },
+        { text: 'Thanks for being the ________ of my life', img: './perk.png', isLast: true }
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const wrapper = document.getElementById('pages-wrapper');
+        
+        pagesData.forEach((data, index) => {
+            const pageDiv = document.createElement('div');
+            pageDiv.className = `page ${index === 0 ? 'active cover' : ''}`;
+            pageDiv.id = `page-${index}`;
+
+            let contentHTML = `<div class="ink-text">${data.text}</div>`;
+
+            if (data.img) {
+                contentHTML += `
+                <div class="snack-container">
+                    <div class="snack-wrapper">
+                        <img src="${data.img}" class="snack-img" alt="Snack Image" 
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="placeholder-box">
+                            <span style="font-size: 1.5rem; margin-bottom: 5px;">🖼️</span>
+                            Please save image as<br><b>${data.img.replace('./', '')}</b><br>in the same folder.
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            if (index === 0) {
+                contentHTML += `<div class="tap-hint">Tap to begin</div>`;
+            } else if (data.isLast) {
+                contentHTML += `<div class="tap-hint">Tap to restart</div>`;
+            }
+
+            pageDiv.innerHTML = contentHTML;
+            wrapper.appendChild(pageDiv);
+        });
+
+        const pages = document.querySelectorAll('.page');
+        let currentPage = 0;
+        const totalPages = pages.length;
+        const container = document.getElementById('book-container');
+
+        container.addEventListener('click', () => {
+            if (currentPage < totalPages - 1) {
+                pages[currentPage].classList.remove('active');
+                pages[currentPage].classList.add('done');
+                
+                currentPage++;
+                pages[currentPage].classList.add('active');
+            } else {
+                pages.forEach((page, index) => {
+                    page.classList.remove('active', 'done');
+                });
+                
+                currentPage = 0;
+                setTimeout(() => {
+                    pages[0].classList.add('active');
+                }, 50);
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
